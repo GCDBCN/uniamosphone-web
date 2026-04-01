@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniamosPhone — Llamadas Internacionales Baratas desde tu Navegador</title>
+  <meta name="description" content="Llama a cualquier teléfono del mundo desde tu navegador. Sin apps, sin contratos, desde $0.02/min. Números virtuales, grabación con IA y más.">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --primary-light: #d1fae5;
+      --bg: #0a0a0a;
+      --bg-card: #141414;
+      --bg-elevated: #1a1a1a;
+      --text: #fafafa;
+      --text-muted: #a1a1aa;
+      --border: #27272a;
+      --accent: #6366f1;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10,10,10,0.8); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo { font-size: 1.4rem; font-weight: 800; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+    .logo i { font-size: 1.2rem; }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text); }
+    .btn-primary { background: var(--primary); color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); padding: 10px 24px; border-radius: 8px; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .hero { padding: 140px 0 80px; display: grid; grid-template-columns: 1fr 420px; gap: 60px; align-items: center; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); border-radius: 100px; font-size: 0.8rem; color: var(--primary); font-weight: 500; margin-bottom: 20px; }
+    .hero h1 { font-size: 3.5rem; font-weight: 900; line-height: 1.1; margin-bottom: 20px; letter-spacing: -0.02em; }
+    .hero h1 .gradient { background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { font-size: 1.15rem; color: var(--text-muted); margin-bottom: 32px; max-width: 500px; }
+    .hero-ctas { display: flex; gap: 16px; align-items: center; }
+    .hero-stats { display: flex; gap: 40px; margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+    .hero-stat .number { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+    .hero-stat .label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    .dialer { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; box-shadow: var(--shadow-lg); }
+    .dialer-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .dialer-status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .dialer-display { background: var(--bg-elevated); border-radius: 12px; padding: 16px 20px; margin-bottom: 8px; min-height: 64px; display: flex; flex-direction: column; justify-content: center; }
+    .dialer-number { font-size: 1.8rem; font-weight: 700; letter-spacing: 2px; text-align: center; color: var(--text); min-height: 40px; }
+    .dialer-rate { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 4px; }
+    .country-select { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; cursor: pointer; font-size: 0.85rem; color: var(--text); }
+    .country-select .flag { font-size: 1.3rem; }
+    .country-select .chevron { margin-left: auto; color: var(--text-muted); font-size: 0.7rem; }
+    .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .key { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 14px 0; text-align: center; cursor: pointer; transition: all 0.15s; user-select: none; }
+    .key:hover { background: #222; border-color: var(--primary); }
+    .key:active { transform: scale(0.95); background: rgba(16,185,129,0.1); }
+    .key .digit { font-size: 1.3rem; font-weight: 600; display: block; }
+    .key .letters { font-size: 0.55rem; color: var(--text-muted); letter-spacing: 2px; display: block; margin-top: 1px; }
+    .call-btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .call-btn:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(16,185,129,0.3); }
+    .call-btn i { font-size: 1.1rem; }
+    .trust-bar { display: flex; justify-content: center; gap: 48px; padding: 40px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .trust-item { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 0.85rem; }
+    .trust-item i { color: var(--primary); font-size: 1rem; }
+    section { padding: 100px 0; }
+    .section-header { text-align: center; margin-bottom: 64px; }
+    .section-header .tag { display: inline-block; padding: 4px 14px; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); border-radius: 100px; font-size: 0.8rem; color: var(--primary); font-weight: 500; margin-bottom: 16px; }
+    .section-header h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -0.02em; }
+    .section-header p { color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 1.05rem; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+    .step { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; position: relative; transition: all 0.3s; }
+    .step:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+    .step-number { width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; margin-bottom: 20px; }
+    .step h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; }
+    .step p { color: var(--text-muted); font-size: 0.9rem; }
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; transition: all 0.3s; }
+    .feature-card:hover { border-color: var(--primary); }
+    .feature-icon { width: 44px; height: 44px; background: rgba(16,185,129,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--primary); font-size: 1.2rem; }
+    .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { color: var(--text-muted); font-size: 0.9rem; }
+    .pricing-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 48px; max-width: 800px; margin: 0 auto; }
+    .pricing-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .pricing-row:last-child { border-bottom: none; }
+    .pricing-country { display: flex; align-items: center; gap: 12px; }
+    .pricing-country .flag { font-size: 1.5rem; }
+    .pricing-country .name { font-weight: 600; }
+    .pricing-rate { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+    .pricing-rate .unit { font-size: 0.75rem; color: var(--text-muted); font-weight: 400; }
+    .comparison-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--bg-card); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); }
+    .comparison-table th, .comparison-table td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border); }
+    .comparison-table th { background: var(--bg-elevated); font-weight: 600; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .comparison-table td { font-size: 0.9rem; }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .highlight-col { background: rgba(16,185,129,0.05); }
+    .check { color: var(--primary); font-weight: 700; }
+    .cross { color: var(--text-muted); }
+    .testimonials { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .testimonial { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+    .testimonial-stars { color: var(--warning); margin-bottom: 12px; font-size: 0.9rem; }
+    .testimonial-text { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; font-style: italic; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: var(--primary); }
+    .testimonial-name { font-weight: 600; font-size: 0.9rem; }
+    .testimonial-location { font-size: 0.8rem; color: var(--text-muted); }
+    .cta-section { text-align: center; padding: 80px 0; background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(99,102,241,0.1)); border-radius: 24px; margin: 40px 0; }
+    .cta-section h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; }
+    .cta-section p { color: var(--text-muted); margin-bottom: 32px; font-size: 1.1rem; }
+    footer { border-top: 1px solid var(--border); padding: 60px 0 30px; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 40px; }
+    .footer-brand p { color: var(--text-muted); font-size: 0.85rem; margin-top: 12px; max-width: 300px; }
+    .footer-col h4 { font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 16px; }
+    .footer-col a { display: block; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; margin-bottom: 10px; transition: color 0.2s; }
+    .footer-col a:hover { color: var(--primary); }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted); }
+    .footer-bottom a { color: var(--text-muted); text-decoration: none; }
+    .footer-bottom a:hover { color: var(--primary); }
+    .footer-powered { display: flex; gap: 20px; }
+    @media (max-width: 968px) {
+      .hero { grid-template-columns: 1fr; padding: 120px 0 60px; }
+      .hero h1 { font-size: 2.5rem; }
+      .dialer { max-width: 380px; margin: 0 auto; }
+      .steps { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .testimonials { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .trust-bar { flex-wrap: wrap; gap: 24px; justify-content: center; }
+      .hero-stats { flex-wrap: wrap; gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <nav><div class="container"><a href="/" class="logo"><i class="fas fa-phone-alt"></i> UniamosPhone</a><div class="nav-links"><a href="#features">Funcionalidades</a><a href="#rates">Tarifas</a><a href="#enterprise">Empresas</a><a href="#faq">FAQ</a><a href="#" class="btn-outline">Iniciar sesion</a><a href="#" class="btn-primary"><i class="fas fa-phone"></i> Llamar ahora</a></div></div></nav>
+  <div class="container"><div class="hero"><div class="hero-content"><div class="hero-badge"><i class="fas fa-bolt"></i> Ahorra 90% vs operadores</div><h1>Llamadas Internacionales <span class="gradient">desde tu Navegador</span></h1><p>Llama a cualquier telefono del mundo directamente desde tu navegador. Sin apps, sin contratos, sin cuotas ocultas. Desde $0.02/min.</p><div class="hero-ctas"><a href="#" class="btn-primary" style="padding:14px 32px;font-size:1rem;"><i class="fas fa-rocket"></i> Empezar gratis</a><a href="#rates" class="btn-outline" style="padding:14px 32px;">Ver tarifas</a></div><div class="hero-stats"><div class="hero-stat"><div class="number">200+</div><div class="label">Paises disponibles</div></div><div class="hero-stat"><div class="number">$0.02</div><div class="label">Precio minimo/min</div></div><div class="hero-stat"><div class="number">HD</div><div class="label">Calidad de audio</div></div></div></div>
+  <div class="dialer" id="dialer"><div class="dialer-header"><span style="font-weight:700;font-size:0.9rem;">Marcador</span><div class="dialer-status"><div class="status-dot"></div><span style="color:var(--primary);font-weight:500;">Conectado</span></div></div><div class="country-select" onclick="toggleCountryHint()"><span class="flag" id="selectedFlag">&#127466;&#127480;</span><span id="selectedCountry">Espana +34</span><span class="chevron"><i class="fas fa-chevron-down"></i></span></div><div class="dialer-display"><div class="dialer-number" id="dialerNumber">+34</div><div class="dialer-rate" id="dialerRate">$0.04/min a Espana</div></div><div class="keypad"><div class="key" onclick="pressKey('1')"><span class="digit">1</span><span class="letters">&nbsp;</span></div><div class="key" onclick="pressKey('2')"><span class="digit">2</span><span class="letters">ABC</span></div><div class="key" onclick="pressKey('3')"><span class="digit">3</span><span class="letters">DEF</span></div><div class="key" onclick="pressKey('4')"><span class="digit">4</span><span class="letters">GHI</span></div><div class="key" onclick="pressKey('5')"><span class="digit">5</span><span class="letters">JKL</span></div><div class="key" onclick="pressKey('6')"><span class="digit">6</span><span class="letters">MNO</span></div><div class="key" onclick="pressKey('7')"><span class="digit">7</span><span class="letters">PQRS</span></div><div class="key" onclick="pressKey('8')"><span class="digit">8</span><span class="letters">TUV</span></div><div class="key" onclick="pressKey('9')"><span class="digit">9</span><span class="letters">WXYZ</span></div><div class="key" onclick="pressKey('*')"><span class="digit">*</span><span class="letters">&nbsp;</span></div><div class="key" onclick="pressKey('0')"><span class="digit">0</span><span class="letters">+</span></div><div class="key" onclick="pressKey('#')"><span class="digit">#</span><span class="letters">&nbsp;</span></div></div><div style="display:flex;gap:8px;margin-bottom:12px;"><button onclick="backspace()" style="flex:1;padding:10px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;color:var(--text-muted);cursor:pointer;font-size:0.85rem;"><i class="fas fa-backspace"></i></button><button onclick="clearNumber()" style="flex:1;padding:10px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;color:var(--text-muted);cursor:pointer;font-size:0.85rem;">Borrar</button></div><button class="call-btn" onclick="makeCall()"><i class="fas fa-phone"></i> Llamar</button></div></div></div>
+  <div class="container"><div class="trust-bar"><div class="trust-item"><i class="fas fa-lock"></i> Cifrado SSL</div><div class="trust-item"><i class="fas fa-shield-alt"></i> Pagos seguros con Stripe</div><div class="trust-item"><i class="fas fa-globe"></i> 200+ paises</div><div class="trust-item"><i class="fas fa-headphones"></i> Audio HD</div><div class="trust-item"><i class="fas fa-bolt"></i> Sin instalacion</div></div></div>
+  <section id="how"><div class="container"><div class="section-header"><div class="tag">Como funciona</div><h2>Empieza a llamar en 60 segundos</h2><p>Sin verificacion de telefono, sin apps que instalar. Solo necesitas un email.</p></div><div class="steps"><div class="step"><div class="step-number">1</div><h3>Crea tu cuenta</h3><p>Registrate en segundos con tu email. Sin verificacion de telefono ni documentos.</p></div><div class="step"><div class="step-number">2</div><h3>Anade credito</h3><p>Recarga tu wallet con Stripe. Solo pagas por los minutos que usas, sin suscripciones.</p></div><div class="step"><div class="step-number">3</div><h3>Llama al mundo</h3><p>Marca cualquier numero y llama directamente desde tu navegador con calidad HD.</p></div></div></div></section>
+  <section id="features" style="background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);"><div class="container"><div class="section-header"><div class="tag">Funcionalidades</div><h2>Todo lo que necesitas para llamar</h2><p>Mas que un simple marcador. UniamosPhone tiene todo para particulares y empresas.</p></div><div class="features-grid"><div class="feature-card"><div class="feature-icon"><i class="fas fa-globe-americas"></i></div><h3>Llamadas a 200+ paises</h3><p>Llama a moviles y fijos en todo el mundo. Sin restricciones de pais ni limites de uso.</p></div><div class="feature-card"><div class="feature-icon"><i class="fas fa-phone-volume"></i></div><h3>Numeros virtuales</h3><p>Compra numeros de telefono de otros paises. Recibe llamadas en tu navegador y usalos como Caller ID.</p></div><div class="feature-card"><div class="feature-icon"><i class="fas fa-robot"></i></div><h3>Grabacion + Transcripcion IA</h3><p>Graba tus llamadas y obtén transcripciones automaticas con inteligencia artificial. Busca en tus conversaciones.</p></div><div class="feature-card"><div class="feature-icon"><i class="fas fa-users"></i></div><h3>Plan empresarial</h3><p>Crea equipos con wallet compartido, miembros ilimitados, Caller ID corporativo y analytics por miembro.</p></div><div class="feature-card"><div class="feature-icon"><i class="fas fa-id-card"></i></div><h3>Caller ID personalizado</h3><p>Elige que numero aparece cuando llamas. Usa tus numeros virtuales o configura uno propio.</p></div><div class="feature-card"><div class="feature-icon"><i class="fas fa-shield-alt"></i></div><h3>Privacidad y seguridad</h3><p>Todas las llamadas estan cifradas con WebRTC. Tu datos nunca se comparten con terceros.</p></div></div></div></section>
+  <section id="rates"><div class="container"><div class="section-header"><div class="tag">Tarifas</div><h2>Precios transparentes, sin sorpresas</h2><p>Solo pagas por lo que usas. Sin cuotas mensuales obligatorias.</p></div><div class="pricing-section"><div class="pricing-row"><div class="pricing-country"><span class="flag">&#127482;&#127480;</span><span class="name">Estados Unidos</span></div><div class="pricing-rate">$0.03 <span class="unit">/min</span></div></div><div class="pricing-row"><div class="pricing-country"><span class="flag">&#127466;&#127480;</span><span class="name">Espana</span></div><div class="pricing-rate">$0.04 <span class="unit">/min</span></div></div><div class="pricing-row"><div class="pricing-country"><span class="flag">&#127474;&#127485;</span><span class="name">Mexico</span></div><div class="pricing-rate">$0.03 <span class="unit">/min</span></div></div><div class="pricing-row"><div class="pricing-country"><span class="flag">&#127468;&#127463;</span><span class="name">Reino Unido</span></div><div class="pricing-rate">$0.04 <span class="unit">/min</span></div></div><div class="pricing-row"><div class="pricing-country"><span class="flag">&#127465;&#127466;</span><span class="name">Alemania</span></div><div class="pricing-rate">$0.03 <span class="unit">/min</span></div></div><div class="pricing-row"><div class="pricing-country"><span class="flag">&#127462;&#127479;</span><span class="name">Argentina</span></div><div class="pricing-rate">$0.04 <span class="unit">/min</span></div></div><div class="pricing-row"><div class="pricing-country"><span class="flag">&#127470;&#127475;</span><span class="name">India</span></div><div class="pricing-rate">$0.02 <span class="unit">/min</span></div></div><div class="pricing-row"><div class="pricing-country"><span class="flag">&#127464;&#127476;</span><span class="name">Colombia</span></div><div class="pricing-rate">$0.03 <span class="unit">/min</span></div></div><div style="text-align:center;margin-top:24px;"><a href="#" class="btn-primary">Ver todas las tarifas <i class="fas fa-arrow-right"></i></a></div></div></div></section>
+  <section style="background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);"><div class="container"><div class="section-header"><div class="tag">Comparativa</div><h2>Por que elegir UniamosPhone</h2></div><div style="overflow-x:auto;"><table class="comparison-table"><thead><tr><th>Funcionalidad</th><th class="highlight-col" style="color:var(--primary);">UniamosPhone</th><th>Google Voice</th><th>Yadaphone</th><th>Skype (cerrado)</th></tr></thead><tbody><tr><td>Desde el navegador</td><td class="highlight-col check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr><tr><td>Sin verificacion de telefono</td><td class="highlight-col check">&#10003;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr><tr><td>Soporte en espanol</td><td class="highlight-col check">&#10003;</td><td class="cross">&#10007;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td></tr><tr><td>Transcripcion IA</td><td class="highlight-col check">&#10003;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr><tr><td>Numeros virtuales</td><td class="highlight-col check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr><tr><td>Plan empresarial</td><td class="highlight-col check">&#10003;</td><td class="cross">&#10007;</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr><tr><td>Sin suscripcion obligatoria</td><td class="highlight-col check">&#10003;</td><td class="check">&#10003;</td><td class="check">&#10003;</td><td class="cross">&#10007;</td></tr><tr><td>200+ paises</td><td class="highlight-col check">&#10003;</td><td class="cross">Limitado</td><td class="check">&#10003;</td><td class="check">&#10003;</td></tr><tr><td>Precio modelo</td><td class="highlight-col" style="color:var(--primary);font-weight:700;">$0.02/min</td><td>Gratis USA</td><td>$0.02/min</td><td>Cerrado</td></tr></tbody></table></div></div></section>
+  <section id="enterprise"><div class="container"><div class="section-header"><div class="tag">Para empresas</div><h2>UniamosPhone para tu equipo</h2><p>Llamadas internacionales para equipos de cualquier tamano. Wallet compartido, sin limite de miembros.</p></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;"><div class="feature-card" style="text-align:center;"><div class="feature-icon" style="margin:0 auto 16px;"><i class="fas fa-microphone"></i></div><h3>Graba llamadas</h3><p style="font-size:0.85rem;">Accede a transcripciones IA de cada llamada del equipo.</p></div><div class="feature-card" style="text-align:center;"><div class="feature-icon" style="margin:0 auto 16px;"><i class="fas fa-user-plus"></i></div><h3>Miembros ilimitados</h3><p style="font-size:0.85rem;">Anade personas a tu equipo sin coste extra por usuario.</p></div><div class="feature-card" style="text-align:center;"><div class="feature-icon" style="margin:0 auto 16px;"><i class="fas fa-headset"></i></div><h3>Soporte prioritario</h3><p style="font-size:0.85rem;">Soporte 24/7 por chat y email para tu empresa.</p></div><div class="feature-card" style="text-align:center;"><div class="feature-icon" style="margin:0 auto 16px;"><i class="fas fa-chart-bar"></i></div><h3>Analytics</h3><p style="font-size:0.85rem;">Dashboard con gastos por miembro y destinos mas llamados.</p></div></div><div style="text-align:center;margin-top:40px;"><a href="#" class="btn-primary" style="padding:16px 40px;font-size:1.05rem;">Ver planes empresariales <i class="fas fa-arrow-right"></i></a></div></div></section>
+  <section style="background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);"><div class="container"><div class="section-header"><div class="tag">Testimonios</div><h2>Lo que dicen nuestros usuarios</h2></div><div class="testimonials"><div class="testimonial"><div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><div class="testimonial-text">\"Llamo a mi familia en Mexico cada semana y gasto menos de $2. Antes con mi operador pagaba $15 por la misma llamada.\"</div><div class="testimonial-author"><div class="testimonial-avatar">MR</div><div><div class="testimonial-name">Maria R.</div><div class="testimonial-location">Barcelona, Espana</div></div></div></div><div class="testimonial"><div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><div class="testimonial-text">\"La transcripcion IA nos ahorra horas. Grabamos las llamadas con proveedores y el resumen esta listo en segundos.\"</div><div class="testimonial-author"><div class="testimonial-avatar">CL</div><div><div class="testimonial-name">Carlos L.</div><div class="testimonial-location">Buenos Aires, Argentina</div></div></div></div><div class="testimonial"><div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div><div class="testimonial-text">\"Nuestro equipo de 20 personas usa UniamosPhone para llamar a clientes en toda Latinoamerica. El wallet compartido es genial.\"</div><div class="testimonial-author"><div class="testimonial-avatar">JP</div><div><div class="testimonial-name">Javier P.</div><div class="testimonial-location">Bogota, Colombia</div></div></div></div></div></div></section>
+  <section><div class="container"><div class="cta-section"><h2>Empieza a llamar hoy</h2><p>Crea tu cuenta gratis en 30 segundos. Tu primera llamada es por nuestra cuenta.</p><div style="display:flex;gap:16px;justify-content:center;"><a href="#" class="btn-primary" style="padding:16px 40px;font-size:1.1rem;"><i class="fas fa-rocket"></i> Crear cuenta gratis</a><a href="#" class="btn-outline" style="padding:16px 40px;font-size:1.1rem;">Ver demo</a></div></div></div></section>
+  <footer><div class="container"><div class="footer-grid"><div class="footer-brand"><a href="/" class="logo"><i class="fas fa-phone-alt"></i> UniamosPhone</a><p>Llamadas internacionales baratas desde tu navegador. Conectando personas en todo el mundo.</p><div class="footer-powered" style="margin-top:20px;"><span style="font-size:0.75rem;color:var(--text-muted);">Powered by WebRTC &bull; Pagos seguros con Stripe</span></div></div><div class="footer-col"><h4>Producto</h4><a href="#">Marcador</a><a href="#">Tarifas</a><a href="#">Numeros virtuales</a><a href="#">Plan empresarial</a><a href="#">API</a></div><div class="footer-col"><h4>Paises populares</h4><a href="#">&#127482;&#127480; Estados Unidos</a><a href="#">&#127466;&#127480; Espana</a><a href="#">&#127474;&#127485; Mexico</a><a href="#">&#127462;&#127479; Argentina</a><a href="#">&#127464;&#127476; Colombia</a></div><div class="footer-col"><h4>Soporte</h4><a href="#">Centro de ayuda</a><a href="#">FAQ</a><a href="#">Contacto</a><a href="#">Blog</a><a href="#">Estado del servicio</a></div></div><div class="footer-bottom"><span>&copy; 2026 UniamosPhone. Todos los derechos reservados.</span><div style="display:flex;gap:20px;"><a href="#">Privacidad</a><a href="#">Terminos</a><a href="#">Cookies</a></div></div></div></footer>
+  <script>
+    let currentNumber = '+34';
+    const countries = { 'ES': { name: 'Espana', code: '+34', flag: '\u{1F1EA}\u{1F1F8}', rate: '0.04' }, 'US': { name: 'Estados Unidos', code: '+1', flag: '\u{1F1FA}\u{1F1F8}', rate: '0.03' }, 'MX': { name: 'Mexico', code: '+52', flag: '\u{1F1F2}\u{1F1FD}', rate: '0.03' }, 'AR': { name: 'Argentina', code: '+54', flag: '\u{1F1E6}\u{1F1F7}', rate: '0.04' }, 'GB': { name: 'Reino Unido', code: '+44', flag: '\u{1F1EC}\u{1F1E7}', rate: '0.04' }, 'DE': { name: 'Alemania', code: '+49', flag: '\u{1F1E9}\u{1F1EA}', rate: '0.03' }, 'CO': { name: 'Colombia', code: '+57', flag: '\u{1F1E8}\u{1F1F4}', rate: '0.03' }, 'IN': { name: 'India', code: '+91', flag: '\u{1F1EE}\u{1F1F3}', rate: '0.02' } };
+    let currentCountry = 'ES';
+    function pressKey(key) { if (currentNumber.length < 20) { currentNumber += key; updateDisplay(); var el = event.currentTarget; el.style.background = 'rgba(16,185,129,0.15)'; setTimeout(function(){el.style.background='';}, 150); } }
+    function backspace() { var code = countries[currentCountry].code; if (currentNumber.length > code.length) { currentNumber = currentNumber.slice(0, -1); updateDisplay(); } }
+    function clearNumber() { currentNumber = countries[currentCountry].code; updateDisplay(); }
+    function updateDisplay() { document.getElementById('dialerNumber').textContent = currentNumber || countries[currentCountry].code; var c = countries[currentCountry]; document.getElementById('dialerRate').textContent = '$' + c.rate + '/min a ' + c.name; }
+    function toggleCountryHint() { var keys = Object.keys(countries); var idx = keys.indexOf(currentCountry); currentCountry = keys[(idx + 1) % keys.length]; var c = countries[currentCountry]; currentNumber = c.code; document.getElementById('selectedFlag').textContent = c.flag; document.getElementById('selectedCountry').textContent = c.name + ' ' + c.code; updateDisplay(); }
+    function makeCall() { var btn = document.querySelector('.call-btn'); if (btn.dataset.calling === 'true') { btn.dataset.calling = 'false'; btn.innerHTML = '<i class="fas fa-phone"></i> Llamar'; btn.style.background = 'var(--primary)'; return; } if (currentNumber.length <= countries[currentCountry].code.length) { alert('Introduce un numero de telefono'); return; } btn.dataset.calling = 'true'; btn.innerHTML = '<i class="fas fa-phone-slash"></i> Colgar (demo)'; btn.style.background = '#ef4444'; var seconds = 0; var timer = setInterval(function(){ if (btn.dataset.calling !== 'true') { clearInterval(timer); return; } seconds++; var m = Math.floor(seconds / 60); var s = seconds % 60; var cost = (seconds / 60 * parseFloat(countries[currentCountry].rate)).toFixed(3); document.getElementById('dialerRate').textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + ' \u2014 $' + cost; }, 1000); }
+    document.addEventListener('keydown', function(e) { if ('0123456789*#'.includes(e.key)) pressKey(e.key); if (e.key === 'Backspace') backspace(); if (e.key === 'Enter') makeCall(); });
+  </script>
+</body>
+</html>
