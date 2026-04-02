@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UniamosPhone â Dashboard</title>
+  <title>UniamosPhone — Dashboard</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -591,25 +591,25 @@
 <div class="auth-screen active" id="authScreen">
   <div class="auth-card">
     <div class="auth-logo"><i class="fas fa-phone-alt"></i> UniamosPhone</div>
-    <div class="auth-title" id="authTitle">Iniciar sesiÃ³n</div>
+    <div class="auth-title" id="authTitle">Iniciar sesión</div>
     <div class="auth-subtitle" id="authSubtitle">Accede a tu cuenta para continuar</div>
 
     <div class="auth-error" id="authError"></div>
 
     <div class="auth-input-group">
-      <label class="auth-input-label">Correo electrÃ³nico</label>
+      <label class="auth-input-label">Correo electrónico</label>
       <input type="email" class="auth-input" id="authEmail" placeholder="tu@correo.com">
     </div>
 
     <div class="auth-input-group">
-      <label class="auth-input-label">ContraseÃ±a</label>
-      <input type="password" class="auth-input" id="authPassword" placeholder="ContraseÃ±a">
+      <label class="auth-input-label">Contraseña</label>
+      <input type="password" class="auth-input" id="authPassword" placeholder="Contraseña">
     </div>
 
-    <button class="auth-button" id="authSubmitBtn" onclick="handleAuthSubmit()">Iniciar sesiÃ³n</button>
+    <button class="auth-button" id="authSubmitBtn" onclick="handleAuthSubmit()">Iniciar sesión</button>
 
     <div class="auth-toggle">
-      Â¿No tienes cuenta? <button onclick="toggleAuthMode()">Registrarse</button>
+      ¿No tienes cuenta? <button onclick="toggleAuthMode()">Registrarse</button>
     </div>
   </div>
 </div>
@@ -697,7 +697,7 @@
       </div>
       <button class="user-menu-btn" onclick="toggleLogout()"><i class="fas fa-ellipsis-vertical"></i></button>
       <button class="logout-btn" id="logoutBtn" onclick="handleLogout()">
-        <i class="fas fa-sign-out-alt"></i> Cerrar sesiÃ³n
+        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
       </button>
     </div>
   </aside>
@@ -758,7 +758,7 @@
         <div id="callHistoryContainer">
           <div class="empty-state">
             <i class="fas fa-phone" style="font-size: 2rem; margin-bottom: 12px;"></i>
-            <p>No hay llamadas todavÃ­a</p>
+            <p>No hay llamadas todavía</p>
           </div>
         </div>
       </div>
@@ -776,15 +776,15 @@
             <i class="fas fa-id-badge" style="color: var(--accent);"></i>
             <div>
               <div class="label">Llamar desde</div>
-              <div class="number" id="callerIdDisplay">Tu nÃºmero</div>
+              <div class="number" id="callerIdDisplay">Tu número</div>
             </div>
             <span class="chevron"><i class="fas fa-chevron-down"></i></span>
           </div>
 
           <!-- Country -->
           <div class="country-row" onclick="cycleCountry()">
-            <span class="flag" id="dFlag">ðªð¸</span>
-            <span id="dCountry">EspaÃ±a +34</span>
+            <span class="flag" id="dFlag">🇪🇸</span>
+            <span id="dCountry">España +34</span>
             <span class="chevron"><i class="fas fa-chevron-down"></i></span>
           </div>
 
@@ -864,7 +864,7 @@
           <button class="hangup-btn" onclick="endCall()"><i class="fas fa-phone-slash"></i></button>
 
           <div class="live-transcript" id="liveTranscript" style="margin-top: 24px; display: none;">
-            <div class="transcript-line"><span class="speaker">Tu:</span> Hola, buenos dÃ­as...</div>
+            <div class="transcript-line"><span class="speaker">Tu:</span> Hola, buenos días...</div>
           </div>
         </div>
       </div>
@@ -938,9 +938,9 @@
 
   function toggleAuthMode() {
     isSignUp = !isSignUp;
-    document.getElementById('authTitle').textContent = isSignUp ? 'Crear cuenta' : 'Iniciar sesiÃ³n';
+    document.getElementById('authTitle').textContent = isSignUp ? 'Crear cuenta' : 'Iniciar sesión';
     document.getElementById('authSubtitle').textContent = isSignUp ? 'Crea tu cuenta para comenzar' : 'Accede a tu cuenta para continuar';
-    document.getElementById('authSubmitBtn').textContent = isSignUp ? 'Registrarse' : 'Iniciar sesiÃ³n';
+    document.getElementById('authSubmitBtn').textContent = isSignUp ? 'Registrarse' : 'Iniciar sesión';
     showAuthError('', false);
   }
 
@@ -994,7 +994,7 @@
       updateDialer();
     } catch (err) {
       console.error('Error initializing app:', err);
-      showAuthError('Error al cargar la aplicaciÃ³n: ' + err.message);
+      showAuthError('Error al cargar la aplicación: ' + err.message);
     }
   }
 
@@ -1113,7 +1113,7 @@
         container.innerHTML = `
           <div class="empty-state">
             <i class="fas fa-phone" style="font-size: 2rem; margin-bottom: 12px;"></i>
-            <p>No hay llamadas todavÃ­a</p>
+            <p>No hay llamadas todavía</p>
           </div>
         `;
       } else {
@@ -1218,7 +1218,7 @@
     document.getElementById('dRate').textContent = `$${rate}/min a ${countryData.name}`;
     document.getElementById('dFlag').textContent = countryData.flag;
     document.getElementById('dCountry').textContent = `${countryData.name} ${countryData.code}`;
-    document.getElementById('callerIdDisplay').textContent = userProfile?.phone_number || 'Tu nÃºmero';
+    document.getElementById('callerIdDisplay').textContent = userProfile?.phone_number || 'Tu número';
   }
 
   function pk(k) {
@@ -1370,7 +1370,7 @@
       }
     }
 
-    document.getElementById('liveTranscript').innerHTML = '<div class="transcript-line"><span class="speaker">Tu:</span> Hola, buenos dÃ­as...</div>';
+    document.getElementById('liveTranscript').innerHTML = '<div class="transcript-line"><span class="speaker">Tu:</span> Hola, buenos días...</div>';
   }
 
   function toggleMute() {
