@@ -872,6 +872,7 @@
   </div>
 </div>
 
+<script src="https://unpkg.com/@telnyx/webrtc@2/lib/bundle.js"></script>
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
@@ -893,6 +894,101 @@
   let currentCallId = null;
   let selectedTopupAmount = null;
   let isSignUp = false;
+  let telnyxClient = null;
+  let currentCall = null;
+  let telnyxReady = false;
+
+  // --- Telnyx WebRTC ---
+  function initTelnyx() {
+    try {
+      telnyxClient = new window.TelnyxRTC({
+        login: 'usergerard97529',
+        password: 'FqA1&spkmE$H',
+      });
+
+      telnyxClient.on('telnyx.ready', () => {
+        telnyxReady = true;
+        console.log('Telnyx WebRTC connected');
+        const dot = document.querySelector('.dialer-connected .dot');
+        if (dot) dot.style.background = '#10b981';
+      });
+
+      telnyxClient.on('telnyx.error', (error) => {
+        console.error('Telnyx error:', error);
+        telnyxReady = false;
+        const dot = document.querySelector('.dialer-connected .dot');
+        if (dot) dot.style.background = '#ef4444';
+      });
+
+      telnyxClient.on('telnyx.socket.close', () => {
+        telnyxReady = false;
+        console.warn('Telnyx socket closed');
+        const dot = document.querySelector('.dialer-connected .dot');
+        if (dot) dot.style.background = '#f59e0b';
+        // Auto-reconnect after 3 seconds
+        setTimeout(() => {
+          if (!telnyxReady && telnyxClient) {
+            console.log('Reconnecting Telnyx...');
+            telnyxClient.connect();
+          }
+        }, 3000);
+      });
+
+      telnyxClient.on('telnyx.notification', (notification) => {
+        const call = notification.call;
+        if (!call) return;
+
+        switch (notification.type) {
+          case 'callUpdate':
+            handleCallState(call);
+            break;
+        }
+      });
+
+      telnyxClient.connect();
+    } catch (err) {
+      console.error('Error initializing Telnyx:', err);
+    }
+  }
+
+  function handleCallState(call) {
+    const state = call.state;
+    console.log('Call state:', state);
+
+    switch (state) {
+      case 'ringing':
+      case 'trying':
+        document.getElementById('inCallStatus').textContent = 'Conectando...';
+        break;
+      case 'early':
+        document.getElementById('inCallStatus').textContent = 'Sonando...';
+        break;
+      case 'active':
+        document.getElementById('inCallStatus').textContent = 'En llamada';
+        if (currentCallId) {
+          supabase
+            .from('calls')
+            .update({ status: 'in_progress', started_at: new Date() })
+            .eq('id', currentCallId)
+            .then(() => console.log('Call status updated to in_progress'));
+        }
+        const countryData = rates[currentDialerCountryCode];
+        callTimer = setInterval(() => {
+          callSeconds++;
+          const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+          const s = String(callSeconds % 60).padStart(2, '0');
+          const costPerMin = countryData?.rate_mobile || 0;
+          const cost = (callSeconds / 60 * costPerMin).toFixed(3);
+          document.getElementById('inCallTimer').textContent = m + ':' + s;
+          document.getElementById('inCallCost').textContent = '$' + cost;
+        }, 1000);
+        break;
+      case 'hangup':
+      case 'destroy':
+        if (calling) endCall();
+        break;
+    }
+  }
 
   async function handleAuthSubmit() {
     const email = document.getElementById('authEmail').value.trim();
@@ -945,6 +1041,12 @@
   }
 
   async function handleLogout() {
+    // Disconnect Telnyx WebRTC
+    if (telnyxClient) {
+      try { telnyxClient.disconnect(); } catch(e) {}
+      telnyxClient = null;
+      telnyxReady = false;
+    }
     await supabase.auth.signOut();
     document.getElementById('authScreen').classList.add('active');
     document.getElementById('mainApp').style.display = 'none';
@@ -992,6 +1094,9 @@
       document.getElementById('mainApp').style.display = 'flex';
 
       updateDialer();
+
+      // Initialize Telnyx WebRTC after login
+      if (!telnyxClient) initTelnyx();
     } catch (err) {
       console.error('Error initializing app:', err);
       showAuthError('Error al cargar la aplicación: ' + err.message);
@@ -1274,10 +1379,22 @@
     const countryData = rates[currentDialerCountryCode];
     if (!countryData || dialedNumber.length <= countryData.code.length) return;
 
+    if (!telnyxReady || !telnyxClient) {
+      alert('Telnyx WebRTC no está conectado. Espera un momento e inténtalo de nuevo.');
+      return;
+    }
+
+    // Check wallet balance
+    if (!wallet || wallet.balance_cents <= 0) {
+      alert('Saldo insuficiente. Por favor, recarga tu monedero.');
+      return;
+    }
+
     calling = true;
     callSeconds = 0;
 
     try {
+      // Record call in Supabase
       const { data: callRecord, error } = await supabase
         .from('calls')
         .insert([{
@@ -1290,7 +1407,7 @@
           to_country_name: countryData.name,
           number_type: 'mobile',
           status: 'initiated',
-          voip_provider: 'zadarma'
+          voip_provider: 'telnyx'
         }])
         .select()
         .single();
@@ -1298,38 +1415,27 @@
       if (error) throw error;
       currentCallId = callRecord.id;
 
+      // Show in-call UI
       document.getElementById('inCallOverlay').classList.add('active');
       document.getElementById('inCallNumber').textContent = dialedNumber;
       document.getElementById('inCallStatus').textContent = 'Conectando...';
       document.getElementById('inCallTimer').textContent = '00:00';
       document.getElementById('inCallCost').textContent = '$0.000';
 
-      console.log('Call initiated:', callRecord.id);
+      // Place call via Telnyx WebRTC
+      currentCall = telnyxClient.newCall({
+        destinationNumber: dialedNumber,
+        callerName: userProfile?.full_name || 'UniamosPhone',
+        callerNumber: userProfile?.phone_number || '',
+        audio: true,
+        video: false,
+      });
 
-      setTimeout(() => {
-        if (!calling) return;
-        document.getElementById('inCallStatus').textContent = 'En llamada';
-
-        supabase
-          .from('calls')
-          .update({ status: 'in_progress', started_at: new Date() })
-          .eq('id', currentCallId)
-          .then(() => console.log('Call status updated'));
-
-        callTimer = setInterval(() => {
-          callSeconds++;
-          const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
-          const s = String(callSeconds % 60).padStart(2, '0');
-          const costPerMin = countryData.rate_mobile;
-          const cost = (callSeconds / 60 * costPerMin).toFixed(3);
-
-          document.getElementById('inCallTimer').textContent = m + ':' + s;
-          document.getElementById('inCallCost').textContent = '$' + cost;
-        }, 1000);
-      }, 2000);
+      console.log('Telnyx call initiated:', callRecord.id);
     } catch (err) {
       console.error('Error starting call:', err);
       calling = false;
+      currentCall = null;
     }
   }
 
@@ -1339,10 +1445,20 @@
     document.getElementById('inCallOverlay').classList.remove('active');
     document.getElementById('liveTranscript').style.display = 'none';
 
+    // Hang up Telnyx call
+    if (currentCall) {
+      try {
+        currentCall.hangup();
+      } catch (e) {
+        console.warn('Error hanging up Telnyx call:', e);
+      }
+      currentCall = null;
+    }
+
     if (currentCallId) {
       try {
         const countryData = rates[currentDialerCountryCode];
-        const costCents = Math.round((callSeconds / 60 * countryData.rate_mobile) * 100);
+        const costCents = Math.round((callSeconds / 60 * (countryData?.rate_mobile || 0)) * 100);
 
         const { error } = await supabase
           .from('calls')
@@ -1374,7 +1490,15 @@
   }
 
   function toggleMute() {
-    document.getElementById('muteBtn').classList.toggle('active');
+    const btn = document.getElementById('muteBtn');
+    btn.classList.toggle('active');
+    if (currentCall) {
+      if (btn.classList.contains('active')) {
+        currentCall.muteAudio();
+      } else {
+        currentCall.unmuteAudio();
+      }
+    }
   }
 
   function toggleCallRecord() {
