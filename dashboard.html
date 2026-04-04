@@ -583,6 +583,39 @@
     }
     .transcript-line { margin-bottom: 4px; }
     .transcript-line .speaker { font-weight: 600; color: var(--primary); }
+    /* RESPONSIVE */
+    .hamburger { display: none; background: none; border: none; color: var(--text); font-size: 1.3rem; cursor: pointer; padding: 8px; margin-right: 8px; }
+    .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    .sidebar-overlay.active { display: block; }
+
+    @media (max-width: 900px) {
+      .sidebar { position: fixed; left: -260px; top: 0; bottom: 0; z-index: 100; transition: left 0.3s ease; }
+      .sidebar.open { left: 0; }
+      .hamburger { display: flex; align-items: center; }
+      .content { flex-direction: column; }
+      .panel-dialer { width: 100%; border-left: none; border-top: 1px solid var(--border); }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .topbar-btn span, .topbar-btn:not(.primary) { font-size: 0.75rem; padding: 6px 10px; }
+      .auth-card { margin: 16px; max-width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr; }
+      .topbar { padding: 0 10px; gap: 6px; }
+      .topbar-title { font-size: 0.95rem; }
+      .topbar-actions { gap: 6px; }
+      .topbar-btn:not(.primary) { display: none; }
+      .panel-main { padding: 12px; }
+      .wallet-card { padding: 16px; }
+      .wallet-balance { font-size: 1.6rem; }
+      .dialer-wrapper { padding: 12px; }
+      .modal { padding: 16px; max-width: 95%; }
+      .call-item { padding: 10px 12px; gap: 10px; }
+      .in-call-number { font-size: 1.4rem; }
+      .in-call-timer { font-size: 2rem; }
+      .keypad { gap: 4px; }
+      .key { padding: 10px 0; }
+    }
   </style>
 </head>
 <body>
@@ -638,6 +671,7 @@
 
 <!-- MAIN APP -->
 <div class="app" id="mainApp" style="display: none;">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-header">
@@ -706,6 +740,7 @@
   <div class="main">
     <!-- TOP BAR -->
     <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
       <div class="topbar-title">Dashboard</div>
       <div class="topbar-actions">
         <button class="topbar-btn"><i class="fas fa-search"></i> Buscar</button>
@@ -1579,6 +1614,10 @@
   window.proceedTopup = proceedTopup;
   window.toggleCallerID = () => {
     document.getElementById('callerIdDisplay').textContent = 'Cambio de Caller ID (placeholder)';
+  };
+  window.toggleSidebar = () => {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('active');
   };
 </script>
 
